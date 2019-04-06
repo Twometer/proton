@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="600.0" prefWidth="977.0"
       xmlns="http://javafx.com/javafx/8.0.172-ea" fx:controller="de.twometer.proton.gui.ProtonUiController">
     <MenuBar VBox.vgrow="NEVER">
@@ -30,7 +31,12 @@
     </MenuBar>
     <SplitPane dividerPositions="0.25" focusTraversable="true" VBox.vgrow="ALWAYS">
         <TreeView fx:id="treeViewMain"/>
-        <JavaCodeArea fx:id="textAreaCode" prefHeight="200.0" prefWidth="200.0" style="-fx-font-family: monospace;"/>
+        <VirtualizedScrollPane>
+            <content>
+                <JavaCodeArea fx:id="textAreaCode" prefHeight="200.0" prefWidth="200.0"
+                              style="-fx-font-family: monospace;"/>
+            </content>
+        </VirtualizedScrollPane>
     </SplitPane>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
         <padding>

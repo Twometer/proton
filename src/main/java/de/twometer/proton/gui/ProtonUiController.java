@@ -51,6 +51,7 @@ public class ProtonUiController {
                 textAreaCode.replaceText(currentClass.getCode());
             }
         });
+        textAreaCode.setEditable(false);
     }
 
     public void onOpenJar() {
