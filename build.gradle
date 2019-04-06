@@ -9,6 +9,7 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
 dependencies {
@@ -16,6 +17,7 @@ dependencies {
     compile 'org.bitbucket.mstrobel:procyon-expressions:0.5.35'
     compile 'org.bitbucket.mstrobel:procyon-reflection:0.5.35'
     compile 'org.bitbucket.mstrobel:procyon-compilertools:0.5.35'
+    compile 'org.fxmisc.richtext:richtextfx:0.9.3'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.twometer.proton.gui.JavaCodeArea?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -29,7 +30,7 @@
     </MenuBar>
     <SplitPane dividerPositions="0.25" focusTraversable="true" VBox.vgrow="ALWAYS">
         <TreeView fx:id="treeViewMain"/>
-        <TextArea fx:id="textAreaCode" prefHeight="200.0" prefWidth="200.0" style="-fx-font-family: monospace;"/>
+        <JavaCodeArea fx:id="textAreaCode" prefHeight="200.0" prefWidth="200.0" style="-fx-font-family: monospace;"/>
     </SplitPane>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
         <padding>

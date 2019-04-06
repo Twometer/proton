@@ -19,6 +19,7 @@ public class ProtonUiApplication extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("main.fxml")));
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getClassLoader().getResource("java.css")).toExternalForm());
         primaryStage.setTitle(String.format("%s v%s", BuildInfo.NAME_SHORT, BuildInfo.VERSION));
         primaryStage.setScene(scene);
         primaryStage.show();
