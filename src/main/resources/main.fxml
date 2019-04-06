@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="600.0" prefWidth="977.0"
+      xmlns="http://javafx.com/javafx/8.0.172-ea" fx:controller="de.twometer.proton.gui.ProtonUiController">
+    <MenuBar VBox.vgrow="NEVER">
+        <Menu mnemonicParsing="false" text="File">
+            <MenuItem mnemonicParsing="false" onAction="#onOpenJar" text="Open JAR"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+            <MenuItem mnemonicParsing="false" text="Undo"/>
+            <MenuItem mnemonicParsing="false" text="Redo"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Cut"/>
+            <MenuItem mnemonicParsing="false" text="Copy"/>
+            <MenuItem mnemonicParsing="false" text="Paste"/>
+            <MenuItem mnemonicParsing="false" text="Delete"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" text="Select All"/>
+            <MenuItem mnemonicParsing="false" text="Unselect All"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" onAction="#onAbout" text="About Proton"/>
+        </Menu>
+    </MenuBar>
+    <SplitPane dividerPositions="0.25" focusTraversable="true" VBox.vgrow="ALWAYS">
+        <TreeView fx:id="treeViewMain"/>
+        <TextArea fx:id="textAreaCode" prefHeight="200.0" prefWidth="200.0" style="-fx-font-family: monospace;"/>
+    </SplitPane>
+    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+        <padding>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+        </padding>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Label fx:id="status" text="Ready" HBox.hgrow="NEVER">
+            <font>
+                <Font size="11.0"/>
+            </font>
+            <textFill>
+                <Color blue="0.625" green="0.625" red="0.625"/>
+            </textFill>
+        </Label>
+    </HBox>
+</VBox>
