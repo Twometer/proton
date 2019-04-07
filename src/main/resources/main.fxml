@@ -29,7 +29,7 @@
             <MenuItem mnemonicParsing="false" onAction="#onAbout" text="About Proton"/>
         </Menu>
     </MenuBar>
-    <SplitPane dividerPositions="0.25" focusTraversable="true" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.25, 0.75" focusTraversable="true" VBox.vgrow="ALWAYS">
         <TreeView fx:id="treeViewMain"/>
         <VirtualizedScrollPane>
             <content>
@@ -37,6 +37,7 @@
                               style="-fx-font-family: monospace;"/>
             </content>
         </VirtualizedScrollPane>
+        <ListView fx:id="methodsListView"/>
     </SplitPane>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
         <padding>

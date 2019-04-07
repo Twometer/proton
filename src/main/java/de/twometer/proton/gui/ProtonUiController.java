@@ -1,5 +1,6 @@
 package de.twometer.proton.gui;
 
+import com.strobel.assembler.metadata.MethodDefinition;
 import de.twometer.proton.BuildInfo;
 import de.twometer.proton.decompiler.DecompiledClass;
 import de.twometer.proton.decompiler.ProcyonDecompiler;
@@ -10,10 +11,7 @@ import de.twometer.proton.jar.node.JarEntryNode;
 import de.twometer.proton.jar.node.JarFileNode;
 import de.twometer.proton.jar.node.JarNode;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
@@ -29,6 +27,7 @@ public class ProtonUiController {
     public TreeView<JarNode> treeViewMain;
     public CodeArea textAreaCode;
     public Label status;
+    public ListView<MethodDefinition> methodsListView;
 
     private Image jarImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("jar.png")));
     private Image packageImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("package.png")));
@@ -49,6 +48,31 @@ public class ProtonUiController {
                 if (selectedNode.getPathInfo().getPath().isEmpty()) return;
                 currentClass = decompiler.decompile(selectedNode.getPathInfo().getTypeName());
                 textAreaCode.replaceText(currentClass.getCode());
+                methodsListView.getItems().clear();
+                for (MethodDefinition methodDefinition : currentClass.getTypeDefinition().getDeclaredMethods())
+                    methodsListView.getItems().add(methodDefinition);
+            }
+        });
+        methodsListView.setCellFactory(param -> new ListCell<MethodDefinition>() {
+            ImageView imageView = new ImageView();
+
+            @Override
+            protected void updateItem(MethodDefinition item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty) {
+                    imageView.setImage(methodImage);
+                    setGraphic(imageView);
+                    setText(item.getSimpleDescription());
+                } else {
+                    setGraphic(null);
+                    setText("");
+                }
+            }
+        });
+        methodsListView.setOnMouseClicked(event -> {
+            MethodDefinition selectedItem;
+            if (event.getClickCount() == 2 && (selectedItem = methodsListView.getSelectionModel().getSelectedItem()) != null) {
+                textAreaCode.replaceText(decompiler.decompile(selectedItem));
             }
         });
         textAreaCode.setEditable(false);
