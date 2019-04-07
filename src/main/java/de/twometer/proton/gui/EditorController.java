@@ -3,6 +3,8 @@ package de.twometer.proton.gui;
 import com.strobel.assembler.metadata.MethodDefinition;
 import de.twometer.proton.decompiler.DecompiledClass;
 import de.twometer.proton.decompiler.ProcyonDecompiler;
+import de.twometer.proton.recompiler.classBuilder.IClassBuilder;
+import de.twometer.proton.recompiler.classBuilder.InjectEmptyClassBuilder;
 
 public class EditorController {
 
@@ -31,4 +33,12 @@ public class EditorController {
         textAreaCode.replaceText(method);
     }
 
+    public void onCancel() {
+        textAreaCode.getScene().getWindow().hide();
+    }
+
+    public void onCompile() {
+        IClassBuilder builder = new InjectEmptyClassBuilder(decompiler, methodDefinition, textAreaCode.getText());
+        textAreaCode.replaceText(builder.buildSource());
+    }
 }

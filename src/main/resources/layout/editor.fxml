@@ -9,12 +9,12 @@
 
     <JavaCodeArea fx:id="textAreaCode" GridPane.columnSpan="3" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"/>
     <Button mnemonicParsing="false" text="Cancel" GridPane.columnIndex="0" GridPane.halignment="RIGHT"
-            GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+            GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" onAction="#onCancel">
         <GridPane.margin>
             <Insets bottom="5.0"/>
         </GridPane.margin>
     </Button>
-    <Button mnemonicParsing="false" text="Compile" GridPane.columnIndex="1" GridPane.rowIndex="1">
+    <Button mnemonicParsing="false" text="Compile" GridPane.columnIndex="1" GridPane.rowIndex="1" onAction="#onCompile">
         <GridPane.margin>
             <Insets bottom="5.0"/>
         </GridPane.margin>

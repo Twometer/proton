@@ -11,6 +11,8 @@ import com.strobel.decompiler.languages.java.ast.*;
 
 import java.io.StringWriter;
 
+import static de.twometer.proton.decompiler.MethodHelper.isDefinitionOf;
+
 public class ProcyonDecompiler {
 
     private DecompilerContext decompilerContext;
@@ -60,30 +62,12 @@ public class ProcyonDecompiler {
         return writer.toString();
     }
 
-    private boolean methodsEqual(MethodDefinition definition, String name, AstNodeCollection<ParameterDeclaration> parameters) {
-        if (!definition.getName().equals(name))
-            return false;
-        if (definition.getParameters().size() != parameters.size())
-            return false;
-        int idx = 0;
-        for (ParameterDeclaration parameterDeclaration : parameters) {
-            ParameterDefinition parameterDefinition = definition.getParameters().get(idx);
-            if (!parameterDefinition.getParameterType().getName().equals(parameterDeclaration.getType().getUserData(Keys.TYPE_REFERENCE).getName()))
-                return false;
-            idx++;
-        }
-        return true;
-    }
-
-    private boolean isDefinitionOf(MethodDefinition definition, MethodDeclaration declaration) {
-        return methodsEqual(definition, declaration.getName(), declaration.getParameters());
-    }
-
-    private boolean isDefinitionOf(MethodDefinition definition, ConstructorDeclaration declaration) {
-        return methodsEqual(definition, "<init>", declaration.getParameters());
-    }
 
     public DecompilerContext getDecompilerContext() {
         return decompilerContext;
+    }
+
+    public DecompilationOptions getDecompilationOptions() {
+        return decompilationOptions;
     }
 }
