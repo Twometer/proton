@@ -37,7 +37,18 @@
                               style="-fx-font-family: monospace;"/>
             </content>
         </VirtualizedScrollPane>
-        <ListView fx:id="methodsListView"/>
+        <ListView fx:id="methodsListView">
+            <contextMenu>
+                <ContextMenu>
+                    <items>
+                        <MenuItem fx:id="editAsJava" text="Edit Java code" onAction="#onEditAsJava"/>
+                        <MenuItem fx:id="editAsBytecode" text="Edit bytecode" onAction="#onEditAsBytecode"/>
+                        <SeparatorMenuItem/>
+                        <MenuItem fx:id="findUsages" text="Find usages" onAction="#onFindUsages"/>
+                    </items>
+                </ContextMenu>
+            </contextMenu>
+        </ListView>
     </SplitPane>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
         <padding>

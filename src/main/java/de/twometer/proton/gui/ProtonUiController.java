@@ -10,17 +10,21 @@ import de.twometer.proton.jar.node.CondensedPackageNode;
 import de.twometer.proton.jar.node.JarEntryNode;
 import de.twometer.proton.jar.node.JarFileNode;
 import de.twometer.proton.jar.node.JarNode;
+import de.twometer.proton.res.ResourceLoader;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.Objects;
 
 public class ProtonUiController {
 
@@ -29,10 +33,14 @@ public class ProtonUiController {
     public Label status;
     public ListView<MethodDefinition> methodsListView;
 
-    private Image jarImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("jar.png")));
-    private Image packageImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("package.png")));
-    private Image classImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("class.png")));
-    private Image methodImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("method.png")));
+    public MenuItem editAsJava;
+    public MenuItem editAsBytecode;
+    public MenuItem findUsages;
+
+    private Image jarImage = new Image(ResourceLoader.getResourceAsStream("icons/jar.png"));
+    private Image packageImage = new Image(ResourceLoader.getResourceAsStream("icons/package.png"));
+    private Image classImage = new Image(ResourceLoader.getResourceAsStream("icons/class.png"));
+    private Image methodImage = new Image(ResourceLoader.getResourceAsStream("icons/method.png"));
 
     private ProcyonDecompiler decompiler;
     private DecompiledClass currentClass;
@@ -53,6 +61,7 @@ public class ProtonUiController {
                     methodsListView.getItems().add(methodDefinition);
             }
         });
+
         methodsListView.setCellFactory(param -> new ListCell<MethodDefinition>() {
             ImageView imageView = new ImageView();
 
@@ -69,15 +78,24 @@ public class ProtonUiController {
                 }
             }
         });
-        methodsListView.setOnMouseClicked(event -> {
-            MethodDefinition selectedItem;
-            if (event.getClickCount() == 2 && (selectedItem = methodsListView.getSelectionModel().getSelectedItem()) != null) {
-                textAreaCode.replaceText(decompiler.decompile(selectedItem));
-            }
+
+        methodsListView.setOnContextMenuRequested(event -> {
+            MethodDefinition selectedItem = methodsListView.getSelectionModel().getSelectedItem();
+            editAsJava.setDisable(selectedItem == null);
+            editAsBytecode.setDisable(selectedItem == null);
+            findUsages.setDisable(selectedItem == null);
         });
+
+        methodsListView.setOnMouseClicked(event -> {
+            MethodDefinition selectedItem = methodsListView.getSelectionModel().getSelectedItem();
+            if (event.getClickCount() == 2 && selectedItem != null)
+                textAreaCode.replaceText(decompiler.decompile(selectedItem));
+        });
+
         textAreaCode.setEditable(false);
     }
 
+    @FXML
     public void onOpenJar() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open JAR file");
@@ -95,6 +113,36 @@ public class ProtonUiController {
             alert.setContentText("Could not read the given JAR file. Please make sure it is a valid JAR file.");
             alert.show();
         }
+    }
+
+    @FXML
+    public void onEditAsJava() throws IOException {
+        MethodDefinition selectedMethod = methodsListView.getSelectionModel().getSelectedItem();
+        if (selectedMethod == null)
+            return;
+        Stage stage = new Stage();
+        FXMLLoader loader = new FXMLLoader(ResourceLoader.getResource("layout/editor.fxml"));
+        Parent root = loader.load();
+        EditorController controller = loader.getController();
+        controller.setDecompiler(decompiler);
+        controller.setCurrentClass(currentClass);
+        controller.setMethodDefinition(selectedMethod);
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add(ResourceLoader.getResource("css/java.css").toExternalForm());
+        stage.setScene(scene);
+        stage.setTitle("Java Editor");
+        stage.show();
+        controller.setup();
+    }
+
+    @FXML
+    public void onEditAsBytecode() {
+
+    }
+
+    @FXML
+    public void onFindUsages() {
+
     }
 
     private void loadJar(JarFileNode jar) {
@@ -133,6 +181,7 @@ public class ProtonUiController {
         for (JarNode child : src.getChildren()) copyNodes(child, newItem);
     }
 
+    @FXML
     public void onAbout() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(String.format("About %s", BuildInfo.NAME_SHORT));
