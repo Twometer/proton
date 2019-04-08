@@ -18,7 +18,7 @@ public class DecompilerContext {
         return typeLoader;
     }
 
-    MetadataSystem getMetadataSystem() {
+    public MetadataSystem getMetadataSystem() {
         return metadataSystem;
     }
 

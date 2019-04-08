@@ -3,8 +3,19 @@ package de.twometer.proton.gui;
 import com.strobel.assembler.metadata.MethodDefinition;
 import de.twometer.proton.decompiler.DecompiledClass;
 import de.twometer.proton.decompiler.ProcyonDecompiler;
-import de.twometer.proton.recompiler.classBuilder.IClassBuilder;
-import de.twometer.proton.recompiler.classBuilder.InjectEmptyClassBuilder;
+import de.twometer.proton.jar.node.JarFileNode;
+import de.twometer.proton.jar.node.JarNode;
+import de.twometer.proton.recompiler.CompilerResult;
+import de.twometer.proton.recompiler.DummyJarBuilder;
+import de.twometer.proton.recompiler.Recompiler;
+import javafx.scene.control.Alert;
+
+import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
 
 public class EditorController {
 
@@ -12,9 +23,17 @@ public class EditorController {
 
     private ProcyonDecompiler decompiler;
 
+    private JarNode curentJar;
+
     private DecompiledClass currentClass;
 
     private MethodDefinition methodDefinition;
+
+    private Recompiler recompiler;
+
+    void setCurentJar(JarNode curentJar) {
+        this.curentJar = curentJar;
+    }
 
     void setDecompiler(ProcyonDecompiler decompiler) {
         this.decompiler = decompiler;
@@ -28,6 +47,10 @@ public class EditorController {
         this.methodDefinition = methodDefinition;
     }
 
+    public void setRecompiler(Recompiler recompiler) {
+        this.recompiler = recompiler;
+    }
+
     void setup() {
         String method = decompiler.decompile(methodDefinition);
         textAreaCode.replaceText(method);
@@ -38,7 +61,22 @@ public class EditorController {
     }
 
     public void onCompile() {
-        IClassBuilder builder = new InjectEmptyClassBuilder(decompiler, methodDefinition, textAreaCode.getText());
-        textAreaCode.replaceText(builder.buildSource());
+        DummyJarBuilder jarBuilder = new DummyJarBuilder(decompiler, (JarFileNode) curentJar, methodDefinition, textAreaCode.getText());
+        List<JavaFileObject> sources = jarBuilder.buildSources();
+        CompilerResult result = recompiler.compile(currentClass.getTypeDefinition().getFullName(), sources);
+        if (!result.isSuccessful()) {
+            MessageBox.show(Alert.AlertType.ERROR, "Error", "Failed to compile", "Could not compile modified method. See the error list for more details.");
+            for (Diagnostic d : result.getDiagnostics().getDiagnostics())
+                System.err.println(d);
+        } else {
+            File file = new File("C:\\_home\\test.class");
+            try {
+                FileOutputStream os = new FileOutputStream(file);
+                os.write(result.getClassFile());
+                os.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

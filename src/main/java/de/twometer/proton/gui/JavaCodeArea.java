@@ -4,7 +4,6 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.reactfx.Subscription;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -41,12 +40,12 @@ public class JavaCodeArea extends CodeArea {
 
     public JavaCodeArea() {
         setParagraphGraphicFactory(LineNumberFactory.get(this));
-        Subscription cleanupWhenNoLongerNeedIt = this.multiPlainChanges()
+        this.multiPlainChanges()
                 .successionEnds(Duration.ofMillis(250))
                 .subscribe(ignore -> setStyleSpans(0, computeHighlighting(getText())));
     }
 
-    private static StyleSpans<Collection<String>> computeHighlighting(String text) {
+    private StyleSpans<Collection<String>> computeHighlighting(String text) {
         Matcher matcher = PATTERN.matcher(text);
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder
@@ -66,4 +65,5 @@ public class JavaCodeArea extends CodeArea {
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return spansBuilder.create();
     }
+
 }

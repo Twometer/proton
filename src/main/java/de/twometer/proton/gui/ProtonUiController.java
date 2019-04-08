@@ -10,6 +10,7 @@ import de.twometer.proton.jar.node.CondensedPackageNode;
 import de.twometer.proton.jar.node.JarEntryNode;
 import de.twometer.proton.jar.node.JarFileNode;
 import de.twometer.proton.jar.node.JarNode;
+import de.twometer.proton.recompiler.Recompiler;
 import de.twometer.proton.res.ResourceLoader;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -42,11 +43,15 @@ public class ProtonUiController {
     private Image classImage = new Image(ResourceLoader.getResourceAsStream("icons/class.png"));
     private Image methodImage = new Image(ResourceLoader.getResourceAsStream("icons/method.png"));
 
+    private Recompiler recompiler;
     private ProcyonDecompiler decompiler;
     private DecompiledClass currentClass;
+    private JarNode currentJar;
 
     @FXML
     public void initialize() {
+        recompiler = new Recompiler();
+
         treeViewMain.setOnMouseClicked(event -> {
             TreeItem<JarNode> selectedItem;
             JarNode selectedNode;
@@ -107,11 +112,7 @@ public class ProtonUiController {
             loadJar(loader.load(file));
         } catch (IOException e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("An error occurred");
-            alert.setContentText("Could not read the given JAR file. Please make sure it is a valid JAR file.");
-            alert.show();
+            MessageBox.show(Alert.AlertType.ERROR, "Error", "Failed to load JAR file", "Please make sure that you load a valid JAR file.");
         }
     }
 
@@ -127,6 +128,8 @@ public class ProtonUiController {
         controller.setDecompiler(decompiler);
         controller.setCurrentClass(currentClass);
         controller.setMethodDefinition(selectedMethod);
+        controller.setRecompiler(recompiler);
+        controller.setCurentJar(currentJar);
         Scene scene = new Scene(root);
         scene.getStylesheets().add(ResourceLoader.getResource("css/java.css").toExternalForm());
         stage.setScene(scene);
@@ -152,6 +155,7 @@ public class ProtonUiController {
         treeViewMain.setRoot(root.getChildren().get(0));
 
         decompiler = new ProcyonDecompiler(jar.getTypeLoader());
+        currentJar = jar;
     }
 
     private void sortNodes(TreeItem<JarNode> dst) {

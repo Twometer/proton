@@ -10,7 +10,7 @@ public class EmptyClassBuilder implements IClassBuilder {
 
     private TypeDefinition typeDefinition;
 
-    public EmptyClassBuilder(ProcyonDecompiler decompiler, TypeDefinition definition) {
+    EmptyClassBuilder(ProcyonDecompiler decompiler, TypeDefinition definition) {
         this.decompiler = decompiler;
         this.typeDefinition = definition;
     }
