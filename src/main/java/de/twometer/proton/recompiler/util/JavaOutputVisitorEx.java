@@ -1394,7 +1394,6 @@ public class JavaOutputVisitorEx implements IAstVisitor<Void, Void> {
     public Void visitText(final TextNode node, final Void ignored) {
         startNode(node);
         formatter.writeTextLiteral(node.getText());
-        formatter.newLine();
         endNode(node);
         return null;
     }

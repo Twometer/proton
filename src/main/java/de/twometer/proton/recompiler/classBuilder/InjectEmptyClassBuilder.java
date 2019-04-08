@@ -17,7 +17,7 @@ public class InjectEmptyClassBuilder implements IClassBuilder {
 
     private String code;
 
-    public InjectEmptyClassBuilder(ProcyonDecompiler decompiler, MethodDefinition definition, String code) {
+    InjectEmptyClassBuilder(ProcyonDecompiler decompiler, MethodDefinition definition, String code) {
         this.decompiler = decompiler;
         this.method = definition;
         this.code = code;
@@ -29,6 +29,8 @@ public class InjectEmptyClassBuilder implements IClassBuilder {
         for (AstNode child : context.getCompilationUnit().getChildren())
             if (child instanceof ImportDeclaration)
                 context.getVisitor().visitImportDeclaration((ImportDeclaration) child, null);
+            else if (child instanceof PackageDeclaration)
+                context.getVisitor().visitPackageDeclaration((PackageDeclaration) child, null);
 
         TypeDeclaration clone = context.getTypeDeclaration().clone();
         List<EntityDeclaration> newMembers = new ArrayList<>();
@@ -40,10 +42,13 @@ public class InjectEmptyClassBuilder implements IClassBuilder {
                 newMembers.add(new SrcMethodDeclaration(code));
                 continue;
             }
-            if (decl instanceof MethodDeclaration)
-                ((MethodDeclaration) decl).setBody(new BlockStatement());
-            else if (decl instanceof ConstructorDeclaration)
-                ((ConstructorDeclaration) decl).setBody(new BlockStatement());
+            if (decl instanceof MethodDeclaration) {
+                if (!((MethodDeclaration) decl).getBody().isNull())
+                    ((MethodDeclaration) decl).setBody(new BlockStatement());
+            } else if (decl instanceof ConstructorDeclaration) {
+                if (!((ConstructorDeclaration) decl).getBody().isNull())
+                    ((ConstructorDeclaration) decl).setBody(new BlockStatement());
+            }
             newMembers.add(decl);
         }
         clone.getMembers().replaceWith(newMembers);

@@ -63,13 +63,16 @@ public class EditorController {
     public void onCompile() {
         DummyJarBuilder jarBuilder = new DummyJarBuilder(decompiler, (JarFileNode) curentJar, methodDefinition, textAreaCode.getText());
         List<JavaFileObject> sources = jarBuilder.buildSources();
+
         CompilerResult result = recompiler.compile(currentClass.getTypeDefinition().getFullName(), sources);
         if (!result.isSuccessful()) {
             MessageBox.show(Alert.AlertType.ERROR, "Error", "Failed to compile", "Could not compile modified method. See the error list for more details.");
-            for (Diagnostic d : result.getDiagnostics().getDiagnostics())
-                System.err.println(d);
+            for (Diagnostic d : result.getDiagnostics().getDiagnostics()) {
+                System.out.println("===");
+                System.out.println(d);
+            }
         } else {
-            File file = new File("C:\\_home\\test.class");
+            File file = new File("TEMP_CLASS_OUTPUT");
             try {
                 FileOutputStream os = new FileOutputStream(file);
                 os.write(result.getClassFile());
