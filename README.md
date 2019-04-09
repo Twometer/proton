@@ -16,3 +16,4 @@ No more manual writing of bytecode (you can still do that though if you want).
 ### Used libraries
 - [Procyon decompiler](https://bitbucket.org/mstrobel/procyon): Java decompiler engine
 - [ObjectWeb ASM](https://asm.ow2.io/): Class file / bytecode modification library
+- [Apache Commons IO](https://commons.apache.org/proper/commons-io/): Java I/O utilities

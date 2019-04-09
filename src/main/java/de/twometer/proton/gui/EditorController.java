@@ -3,24 +3,20 @@ package de.twometer.proton.gui;
 import com.strobel.assembler.metadata.MethodDefinition;
 import de.twometer.proton.decompiler.DecompiledClass;
 import de.twometer.proton.decompiler.ProcyonDecompiler;
+import de.twometer.proton.jar.node.JarEntryNode;
 import de.twometer.proton.jar.node.JarFileNode;
-import de.twometer.proton.jar.node.JarNode;
 import de.twometer.proton.recompiler.CompilerResult;
 import de.twometer.proton.recompiler.DummyJarBuilder;
 import de.twometer.proton.recompiler.Recompiler;
+import de.twometer.proton.transformer.InjectingTransformer;
 import javafx.scene.control.Alert;
-import jdk.nashorn.internal.codegen.types.Type;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.apache.commons.io.IOUtils;
 
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 public class EditorController {
@@ -29,7 +25,9 @@ public class EditorController {
 
     private ProcyonDecompiler decompiler;
 
-    private JarNode curentJar;
+    private JarFileNode curentJar;
+
+    private JarEntryNode currentJarEntry;
 
     private DecompiledClass currentClass;
 
@@ -37,8 +35,12 @@ public class EditorController {
 
     private Recompiler recompiler;
 
-    void setCurentJar(JarNode curentJar) {
+    void setCurentJar(JarFileNode curentJar) {
         this.curentJar = curentJar;
+    }
+
+    void setCurrentJarEntry(JarEntryNode currentJarEntry) {
+        this.currentJarEntry = currentJarEntry;
     }
 
     void setDecompiler(ProcyonDecompiler decompiler) {
@@ -67,7 +69,7 @@ public class EditorController {
     }
 
     public void onCompile() {
-        DummyJarBuilder jarBuilder = new DummyJarBuilder(decompiler, (JarFileNode) curentJar, methodDefinition, textAreaCode.getText());
+        DummyJarBuilder jarBuilder = new DummyJarBuilder(decompiler, curentJar, methodDefinition, textAreaCode.getText());
         List<JavaFileObject> sources = jarBuilder.buildSources();
 
         CompilerResult result = recompiler.compile(currentClass.getTypeDefinition().getFullName(), sources);
@@ -77,29 +79,27 @@ public class EditorController {
                 System.out.println("===");
                 System.out.println(d);
             }
+
         } else {
 
-            ClassReader classReader = new ClassReader(result.getClassFile());
-            classReader.accept(new ClassVisitor(Opcodes.ASM7) {
-                @Override
-                public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-                    String desc2 = Arrays.toString(Arrays.stream(Type.getMethodArguments(descriptor)).map(Type::getInternalName).toArray());
-                    String desc1 = Arrays.toString(methodDefinition.getParameters().stream().map(c -> c.getParameterType().getFullName().replace(".", "/")).toArray());
-                    if (desc1.equals(desc2) && name.equals(methodDefinition.getName()))
-                        System.out.println("Method " + name + " - " + Arrays.toString(Arrays.stream(Type.getMethodArguments(descriptor)).map(Type::getInternalName).toArray()) + " vs " + Arrays.toString(methodDefinition.getParameters().stream().map(c -> c.getParameterType().getFullName().replace(".", "/")).toArray()) + " " + methodDefinition.getName());
+            byte[] originalClass = null;
+            try {
+                originalClass = IOUtils.toByteArray(curentJar.getJarFile().getInputStream(currentJarEntry.getJarEntry()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            InjectingTransformer transformer = new InjectingTransformer(originalClass, result.getClassFile(), methodDefinition);
 
-                    return super.visitMethod(access, name, descriptor, signature, exceptions);
-                }
-            }, ClassReader.SKIP_DEBUG);
 
-            File file = new File("TEMP_CLASS_OUTPUT");
+            File file = new File("TEMP_CLASS_OUTPUT.class");
             try {
                 FileOutputStream os = new FileOutputStream(file);
-                os.write(result.getClassFile());
+                os.write(transformer.createClassFile());
                 os.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+
 }

@@ -8,6 +8,7 @@ import de.twometer.proton.jar.node.JarNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,7 @@ public class JarLoader {
     public JarFileNode load(File file) throws IOException {
         JarFile jarFile = new JarFile(file);
         ITypeLoader typeLoader = new JarTypeLoader(jarFile);
-        JarFileNode jarFileNode = new JarFileNode(PathInfo.parse(file.getAbsolutePath()), typeLoader);
+        JarFileNode jarFileNode = new JarFileNode(jarFile, PathInfo.parse(file.getAbsolutePath()), typeLoader);
 
         jarFile.stream().forEach(entry -> {
             PathInfo info = PathInfo.parse(entry.getName());
@@ -32,18 +33,18 @@ public class JarLoader {
                 JarNode current = jarFileNode;
                 for (String part : pathParts) {
                     path.append(part).append("/");
-                    current = addAndGet(current, PathInfo.parse(path.toString()));
+                    current = addAndGet(current, entry, PathInfo.parse(path.toString()));
                 }
             }
         });
         return jarFileNode;
     }
 
-    private JarNode addAndGet(JarNode current, PathInfo pathInfo) {
+    private JarNode addAndGet(JarNode current, JarEntry entry, PathInfo pathInfo) {
         for (JarNode child : current.getChildren())
             if (child.getPathInfo().getName().equals(pathInfo.getName()))
                 return child;
-        JarNode child = new JarEntryNode(pathInfo);
+        JarNode child = new JarEntryNode(entry, pathInfo);
         current.addChild(child);
         return child;
     }

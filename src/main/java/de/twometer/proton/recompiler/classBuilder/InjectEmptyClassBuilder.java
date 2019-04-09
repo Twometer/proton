@@ -42,14 +42,7 @@ public class InjectEmptyClassBuilder implements IClassBuilder {
                 newMembers.add(new SrcMethodDeclaration(code));
                 continue;
             }
-            if (decl instanceof MethodDeclaration) {
-                if (!((MethodDeclaration) decl).getBody().isNull())
-                    ((MethodDeclaration) decl).setBody(new BlockStatement());
-            } else if (decl instanceof ConstructorDeclaration) {
-                if (!((ConstructorDeclaration) decl).getBody().isNull())
-                    ((ConstructorDeclaration) decl).setBody(new BlockStatement());
-            }
-            newMembers.add(decl);
+            newMembers.add(MethodEraser.erase(decl));
         }
         clone.getMembers().replaceWith(newMembers);
 

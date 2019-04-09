@@ -46,7 +46,8 @@ public class ProtonUiController {
     private Recompiler recompiler;
     private ProcyonDecompiler decompiler;
     private DecompiledClass currentClass;
-    private JarNode currentJar;
+    private JarFileNode currentJar;
+    private JarEntryNode currentJarEntry;
 
     @FXML
     public void initialize() {
@@ -60,6 +61,7 @@ public class ProtonUiController {
                 if (selectedNode.getPathInfo().getPathType() != PathType.CLASS) return;
                 if (selectedNode.getPathInfo().getPath().isEmpty()) return;
                 currentClass = decompiler.decompile(selectedNode.getPathInfo().getTypeName());
+                currentJarEntry = (JarEntryNode) selectedNode;
                 textAreaCode.replaceText(currentClass.getCode());
                 methodsListView.getItems().clear();
                 for (MethodDefinition methodDefinition : currentClass.getTypeDefinition().getDeclaredMethods())
@@ -127,6 +129,7 @@ public class ProtonUiController {
         EditorController controller = loader.getController();
         controller.setDecompiler(decompiler);
         controller.setCurrentClass(currentClass);
+        controller.setCurrentJarEntry(currentJarEntry);
         controller.setMethodDefinition(selectedMethod);
         controller.setRecompiler(recompiler);
         controller.setCurentJar(currentJar);

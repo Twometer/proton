@@ -7,7 +7,7 @@ public class CondensedPackageNode extends JarEntryNode {
     private String text;
 
     private CondensedPackageNode(PathInfo pathInfo) {
-        super(pathInfo);
+        super(null, pathInfo);
         text = pathInfo.getName();
     }
 
