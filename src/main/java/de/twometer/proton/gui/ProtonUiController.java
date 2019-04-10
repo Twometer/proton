@@ -36,6 +36,7 @@ public class ProtonUiController {
     public Label status;
     public ListView<MethodDefinition> methodsListView;
 
+    public MenuItem exportAsJar;
     public MenuItem editAsJava;
     public MenuItem editAsBytecode;
     public MenuItem findUsages;
@@ -46,13 +47,7 @@ public class ProtonUiController {
     private Image methodImage = new Image(ResourceLoader.getResourceAsStream("icons/method.png"));
 
     private Context context;
-    /*private Recompiler recompiler;
-    private OverwrittenClassCache classCache;
-    private ProcyonDecompiler decompiler;
-    private DecompiledClass currentClass;
-    private JarFileNode currentJar;
-    private JarEntryNode currentJarEntry;
-    private JarWriter jarWriter;*/
+
 
     @FXML
     public void initialize() {
@@ -123,6 +118,11 @@ public class ProtonUiController {
 
     @FXML
     public void onExportJar() {
+        if (!context.getClassCache().hasModifications()) {
+            MessageBox.show(Alert.AlertType.WARNING, "No modifications", "No modifications", "There are no modifications to be exported");
+            return;
+        }
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Export JAR file");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Java Archive", "*.jar"));
@@ -177,6 +177,8 @@ public class ProtonUiController {
         ProcyonDecompiler decompiler = new ProcyonDecompiler(new CompositeTypeLoader(classCache, jar.getTypeLoader()));
         JarWriter jarWriter = new JarWriter(jar, classCache);
         context = new Context(decompiler, jar, jarWriter, classCache);
+
+        exportAsJar.setDisable(false);
     }
 
     private void sortNodes(TreeItem<JarNode> dst) {

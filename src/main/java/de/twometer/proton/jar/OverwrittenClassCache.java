@@ -12,7 +12,6 @@ public class OverwrittenClassCache implements ITypeLoader {
 
     @Override
     public boolean tryLoadType(String internalName, Buffer buffer) {
-        System.out.println("Checking for " + internalName);
         if (overwrittenClasses.containsKey(internalName + ".class")) {
             byte[] overwrittenClass = overwrittenClasses.get(internalName + ".class");
             buffer.putByteArray(overwrittenClass, 0, overwrittenClass.length);
@@ -28,6 +27,10 @@ public class OverwrittenClassCache implements ITypeLoader {
 
     public byte[] getClassData(String classPath) {
         return overwrittenClasses.get(classPath);
+    }
+
+    public boolean hasModifications() {
+        return overwrittenClasses.size() != 0;
     }
 
     public void overwrite(String classPath, byte[] classData) {

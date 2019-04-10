@@ -9,7 +9,6 @@ public class DelegatingMethodVisitor extends MethodVisitor {
     DelegatingMethodVisitor(int i, MethodVisitor delegate) {
         super(i);
         this.delegate = delegate;
-        System.out.println("Delegating method visitor created");
     }
 
     @Override
@@ -45,7 +44,7 @@ public class DelegatingMethodVisitor extends MethodVisitor {
     @Override
     public void visitCode() {
         delegate.visitCode();
-        System.out.println("Visit code clear");
+        System.out.println("Delegated VisitCode");
     }
 
     @Override

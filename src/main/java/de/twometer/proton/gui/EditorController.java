@@ -37,11 +37,15 @@ public class EditorController {
 
         CompilerResult result = context.getRecompiler().compile(context.getCurrentClass().getTypeDefinition().getFullName(), sources);
         if (!result.isSuccessful()) {
-            MessageBox.show(Alert.AlertType.ERROR, "Error", "Failed to compile", "Could not compile modified method. See the error list for more details.");
+
+            StringBuilder s = new StringBuilder();
+
             for (Diagnostic d : result.getDiagnostics().getDiagnostics()) {
-                System.out.println("===");
-                System.out.println(d);
+                s.append(d.toString()).append("\n\n");
             }
+
+            MessageBox.show(Alert.AlertType.ERROR, "Error", "Failed to compile method", s.toString(), true);
+
 
         } else {
 
