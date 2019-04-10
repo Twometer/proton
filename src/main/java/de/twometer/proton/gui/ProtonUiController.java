@@ -10,6 +10,7 @@ import de.twometer.proton.jar.node.CondensedPackageNode;
 import de.twometer.proton.jar.node.JarEntryNode;
 import de.twometer.proton.jar.node.JarFileNode;
 import de.twometer.proton.jar.node.JarNode;
+import de.twometer.proton.jar.writer.JarWriter;
 import de.twometer.proton.recompiler.Recompiler;
 import de.twometer.proton.res.ResourceLoader;
 import javafx.fxml.FXML;
@@ -48,6 +49,7 @@ public class ProtonUiController {
     private DecompiledClass currentClass;
     private JarFileNode currentJar;
     private JarEntryNode currentJarEntry;
+    private JarWriter jarWriter;
 
     @FXML
     public void initialize() {
@@ -119,6 +121,22 @@ public class ProtonUiController {
     }
 
     @FXML
+    public void onExportJar() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export JAR file");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Java Archive", "*.jar"));
+        File file = fileChooser.showSaveDialog(treeViewMain.getScene().getWindow());
+        try {
+            jarWriter.write(file.getAbsolutePath());
+            MessageBox.show(Alert.AlertType.INFORMATION, "Success", "Export successful", "Modified JAR file was successfully exported.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            MessageBox.show(Alert.AlertType.ERROR, "Error", "Export failed", "Modified JAR file failed to export");
+        }
+
+    }
+
+    @FXML
     public void onEditAsJava() throws IOException {
         MethodDefinition selectedMethod = methodsListView.getSelectionModel().getSelectedItem();
         if (selectedMethod == null)
@@ -133,6 +151,7 @@ public class ProtonUiController {
         controller.setMethodDefinition(selectedMethod);
         controller.setRecompiler(recompiler);
         controller.setCurentJar(currentJar);
+        controller.setJarWriter(jarWriter);
         Scene scene = new Scene(root);
         scene.getStylesheets().add(ResourceLoader.getResource("css/java.css").toExternalForm());
         stage.setScene(scene);
@@ -140,6 +159,7 @@ public class ProtonUiController {
         stage.show();
         controller.setup();
     }
+
 
     @FXML
     public void onEditAsBytecode() {
@@ -159,6 +179,7 @@ public class ProtonUiController {
 
         decompiler = new ProcyonDecompiler(jar.getTypeLoader());
         currentJar = jar;
+        jarWriter = new JarWriter(currentJar);
     }
 
     private void sortNodes(TreeItem<JarNode> dst) {
@@ -196,4 +217,5 @@ public class ProtonUiController {
         alert.setContentText("(c) 2019 Twometer Applications");
         alert.show();
     }
+
 }

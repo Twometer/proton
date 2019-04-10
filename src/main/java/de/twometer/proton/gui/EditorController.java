@@ -5,6 +5,7 @@ import de.twometer.proton.decompiler.DecompiledClass;
 import de.twometer.proton.decompiler.ProcyonDecompiler;
 import de.twometer.proton.jar.node.JarEntryNode;
 import de.twometer.proton.jar.node.JarFileNode;
+import de.twometer.proton.jar.writer.JarWriter;
 import de.twometer.proton.recompiler.CompilerResult;
 import de.twometer.proton.recompiler.DummyJarBuilder;
 import de.twometer.proton.recompiler.Recompiler;
@@ -14,8 +15,6 @@ import org.apache.commons.io.IOUtils;
 
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -35,6 +34,8 @@ public class EditorController {
 
     private Recompiler recompiler;
 
+    private JarWriter jarWriter;
+
     void setCurentJar(JarFileNode curentJar) {
         this.curentJar = curentJar;
     }
@@ -53,6 +54,10 @@ public class EditorController {
 
     void setMethodDefinition(MethodDefinition methodDefinition) {
         this.methodDefinition = methodDefinition;
+    }
+
+    void setJarWriter(JarWriter jarWriter) {
+        this.jarWriter = jarWriter;
     }
 
     public void setRecompiler(Recompiler recompiler) {
@@ -90,15 +95,11 @@ public class EditorController {
             }
             InjectingTransformer transformer = new InjectingTransformer(originalClass, result.getClassFile(), methodDefinition);
 
+            String modifiedClassPath = currentClass.getTypeDefinition().getInternalName() + ".class";
+            byte[] modifiedClass = transformer.createClassFile();
 
-            File file = new File("TEMP_CLASS_OUTPUT.class");
-            try {
-                FileOutputStream os = new FileOutputStream(file);
-                os.write(transformer.createClassFile());
-                os.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            jarWriter.overwriteClass(modifiedClassPath, modifiedClass);
+            MessageBox.show(Alert.AlertType.INFORMATION, "Success", "Compiled successfully", "Method has been compiled successfully. Modified bytecode will be written when you export a new JAR file.");
         }
     }
 
