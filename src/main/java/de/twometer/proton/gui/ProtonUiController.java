@@ -1,9 +1,11 @@
 package de.twometer.proton.gui;
 
+import com.strobel.assembler.metadata.CompositeTypeLoader;
 import com.strobel.assembler.metadata.MethodDefinition;
 import de.twometer.proton.BuildInfo;
-import de.twometer.proton.decompiler.DecompiledClass;
+import de.twometer.proton.Context;
 import de.twometer.proton.decompiler.ProcyonDecompiler;
+import de.twometer.proton.jar.OverwrittenClassCache;
 import de.twometer.proton.jar.loader.JarLoader;
 import de.twometer.proton.jar.loader.PathType;
 import de.twometer.proton.jar.node.CondensedPackageNode;
@@ -11,7 +13,6 @@ import de.twometer.proton.jar.node.JarEntryNode;
 import de.twometer.proton.jar.node.JarFileNode;
 import de.twometer.proton.jar.node.JarNode;
 import de.twometer.proton.jar.writer.JarWriter;
-import de.twometer.proton.recompiler.Recompiler;
 import de.twometer.proton.res.ResourceLoader;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -44,17 +45,17 @@ public class ProtonUiController {
     private Image classImage = new Image(ResourceLoader.getResourceAsStream("icons/class.png"));
     private Image methodImage = new Image(ResourceLoader.getResourceAsStream("icons/method.png"));
 
-    private Recompiler recompiler;
+    private Context context;
+    /*private Recompiler recompiler;
+    private OverwrittenClassCache classCache;
     private ProcyonDecompiler decompiler;
     private DecompiledClass currentClass;
     private JarFileNode currentJar;
     private JarEntryNode currentJarEntry;
-    private JarWriter jarWriter;
+    private JarWriter jarWriter;*/
 
     @FXML
     public void initialize() {
-        recompiler = new Recompiler();
-
         treeViewMain.setOnMouseClicked(event -> {
             TreeItem<JarNode> selectedItem;
             JarNode selectedNode;
@@ -62,11 +63,11 @@ public class ProtonUiController {
                 selectedNode = selectedItem.getValue();
                 if (selectedNode.getPathInfo().getPathType() != PathType.CLASS) return;
                 if (selectedNode.getPathInfo().getPath().isEmpty()) return;
-                currentClass = decompiler.decompile(selectedNode.getPathInfo().getTypeName());
-                currentJarEntry = (JarEntryNode) selectedNode;
-                textAreaCode.replaceText(currentClass.getCode());
+                context.setCurrentClass(context.getDecompiler().decompile(selectedNode.getPathInfo().getTypeName()));
+                context.setCurrentJarEntry((JarEntryNode) selectedNode);
+                textAreaCode.replaceText(context.getCurrentClass().getCode());
                 methodsListView.getItems().clear();
-                for (MethodDefinition methodDefinition : currentClass.getTypeDefinition().getDeclaredMethods())
+                for (MethodDefinition methodDefinition : context.getCurrentClass().getTypeDefinition().getDeclaredMethods())
                     methodsListView.getItems().add(methodDefinition);
             }
         });
@@ -98,7 +99,7 @@ public class ProtonUiController {
         methodsListView.setOnMouseClicked(event -> {
             MethodDefinition selectedItem = methodsListView.getSelectionModel().getSelectedItem();
             if (event.getClickCount() == 2 && selectedItem != null)
-                textAreaCode.replaceText(decompiler.decompile(selectedItem));
+                textAreaCode.replaceText(context.getDecompiler().decompile(selectedItem));
         });
 
         textAreaCode.setEditable(false);
@@ -127,7 +128,7 @@ public class ProtonUiController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Java Archive", "*.jar"));
         File file = fileChooser.showSaveDialog(treeViewMain.getScene().getWindow());
         try {
-            jarWriter.write(file.getAbsolutePath());
+            context.getJarWriter().write(file.getAbsolutePath());
             MessageBox.show(Alert.AlertType.INFORMATION, "Success", "Export successful", "Modified JAR file was successfully exported.");
         } catch (IOException e) {
             e.printStackTrace();
@@ -141,17 +142,12 @@ public class ProtonUiController {
         MethodDefinition selectedMethod = methodsListView.getSelectionModel().getSelectedItem();
         if (selectedMethod == null)
             return;
+        context.setCurrentMethod(selectedMethod);
         Stage stage = new Stage();
         FXMLLoader loader = new FXMLLoader(ResourceLoader.getResource("layout/editor.fxml"));
         Parent root = loader.load();
         EditorController controller = loader.getController();
-        controller.setDecompiler(decompiler);
-        controller.setCurrentClass(currentClass);
-        controller.setCurrentJarEntry(currentJarEntry);
-        controller.setMethodDefinition(selectedMethod);
-        controller.setRecompiler(recompiler);
-        controller.setCurentJar(currentJar);
-        controller.setJarWriter(jarWriter);
+        controller.setContext(context);
         Scene scene = new Scene(root);
         scene.getStylesheets().add(ResourceLoader.getResource("css/java.css").toExternalForm());
         stage.setScene(scene);
@@ -177,9 +173,10 @@ public class ProtonUiController {
         sortNodes(root);
         treeViewMain.setRoot(root.getChildren().get(0));
 
-        decompiler = new ProcyonDecompiler(jar.getTypeLoader());
-        currentJar = jar;
-        jarWriter = new JarWriter(currentJar);
+        OverwrittenClassCache classCache = new OverwrittenClassCache();
+        ProcyonDecompiler decompiler = new ProcyonDecompiler(new CompositeTypeLoader(classCache, jar.getTypeLoader()));
+        JarWriter jarWriter = new JarWriter(jar, classCache);
+        context = new Context(decompiler, jar, jarWriter, classCache);
     }
 
     private void sortNodes(TreeItem<JarNode> dst) {
@@ -218,4 +215,7 @@ public class ProtonUiController {
         alert.show();
     }
 
+    public void onExit() {
+        treeViewMain.getScene().getWindow().hide();
+    }
 }

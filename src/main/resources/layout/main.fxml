@@ -13,6 +13,8 @@
         <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" onAction="#onOpenJar" text="Open JAR"/>
             <MenuItem mnemonicParsing="false" onAction="#onExportJar" text="Export modified JAR"/>
+            <SeparatorMenuItem mnemonicParsing="false"/>
+            <MenuItem mnemonicParsing="false" onAction="#onExit" text="Exit"/>
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
             <MenuItem mnemonicParsing="false" text="Undo"/>

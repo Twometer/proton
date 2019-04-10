@@ -1,12 +1,11 @@
 package de.twometer.proton.jar.writer;
 
+import de.twometer.proton.jar.OverwrittenClassCache;
 import de.twometer.proton.jar.node.JarFileNode;
 import org.apache.commons.io.IOUtils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -14,24 +13,21 @@ public class JarWriter {
 
     private JarFileNode fileNode;
 
-    private Map<String, byte[]> overwrittenClasses = new HashMap<>();
+    private OverwrittenClassCache classCache;
 
-    public JarWriter(JarFileNode fileNode) {
+    public JarWriter(JarFileNode fileNode, OverwrittenClassCache classCache) {
         this.fileNode = fileNode;
-    }
-
-    public void overwriteClass(String path, byte[] contents) {
-        overwrittenClasses.put(path, contents);
+        this.classCache = classCache;
     }
 
     public void write(String path) throws IOException {
         ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(path));
         fileNode.getJarFile().stream().forEach(entry -> {
             try {
-                if (overwrittenClasses.containsKey(entry.getName())) {
+                if (classCache.isOverwritten(entry.getName())) {
                     ZipEntry replacement = new ZipEntry(entry.getName());
                     outputStream.putNextEntry(replacement);
-                    outputStream.write(overwrittenClasses.get(entry.getName()));
+                    outputStream.write(classCache.getClassData(entry.getName()));
                 } else {
                     outputStream.putNextEntry(entry);
                     IOUtils.copy(fileNode.getJarFile().getInputStream(entry), outputStream);
